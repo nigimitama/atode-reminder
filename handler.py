@@ -1,5 +1,6 @@
 import json
 import re
+from datetime import datetime, timedelta
 from modules import actions
 
 
@@ -17,10 +18,13 @@ def bot(event, context):
         event = body.get("event")
         if event.get("type") == "message":
             if re.match(r".*(あと|後)で(よむ|読む|みる|見る)", event["text"]):
-                actions.react_by_emoji(event)
-                actions.set_reminder(event)
-                return {"statusCode": 200}
-        
+                ts = datetime.fromtimestamp(event["ts"])
+                now = datetime.utcnow() + timedelta(hours=9)
+                is_recent_message = (now - ts).seconds < 60
+                if is_recent_message:
+                    actions.react_by_emoji(event)
+                    actions.set_reminder(event)
+
         return {"statusCode": 200}
     except Exception as e:
         print(e)
