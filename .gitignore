@@ -23,4 +23,5 @@ var/
 node_modules/
 .env
 tests/
+memo/
 __pycache__

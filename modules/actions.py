@@ -44,7 +44,7 @@ def handle_interaction(body: str):
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "お疲れ様でした！",
+                "text": f"> {buttons['done']}\nお疲れ様でした！",
             }
         }]
         return slack.update_message(
@@ -75,7 +75,7 @@ def handle_interaction(body: str):
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "またリマインドします！",
+                "text": f"> {buttons['remind']}\nまたリマインドします！",
             }
         }]
         return slack.update_message(
@@ -90,6 +90,11 @@ def _parse_interaction_payloads(body: str) -> dict:
     body = unquote(body)
     return json.loads(body.replace("payload=", ""))
 
+
+buttons = {
+    "done": "読んだ！",
+    "remind": "また1時間後にリマインド"
+}
 
 
 def _gen_blocks(message_url: str) -> str:
@@ -113,7 +118,7 @@ def _gen_blocks(message_url: str) -> str:
                     "type": "button",
                     "text": {
                         "type": "plain_text",
-                        "text": "読んだ！",
+                        "text": buttons["done"],
                     },
                     "style": "primary",
                     "value": "done",
@@ -123,7 +128,7 @@ def _gen_blocks(message_url: str) -> str:
                     "type": "button",
                     "text": {
                         "type": "plain_text",
-                        "text": "また1時間後にリマインド",
+                        "text": buttons["remind"],
                     },
                     "value": "remind",
                     "action_id": "actionId-1"
