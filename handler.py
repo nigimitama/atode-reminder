@@ -28,6 +28,6 @@ def bot(event, context):
                     actions.set_reminder(event)
 
         return {"statusCode": 200}
-    except Exception as e:
+    except Exception:
         print(traceback.format_exc())
         return {"statusCode": 500, "body": "unexpected error"}
