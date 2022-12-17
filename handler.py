@@ -18,7 +18,7 @@ def bot(event, context):
 
         event = body.get("event")
         if event.get("type") == "message":
-            if re.match(r".*(あと|後)で(よむ|読む|みる|見る)", event["text"]):
+            if re.match(r".*(あと|後)で(よ|読|み|見)", event["text"]) or re.match(r".*atode", event["text"]):
                 ts = datetime.fromtimestamp(float(event["ts"]))
                 now = datetime.utcnow()
                 is_recent_message = (now - ts).seconds < 60
