@@ -10,11 +10,20 @@ provider:
     SLACK_TOKEN: ${env:SLACK_TOKEN}
 
 functions:
-  bot:
-    handler: handler.bot
+  listen_event:
+    handler: handler.listen_event
     events:
       - httpApi:
-          path: /
+          path: /listen_event
+          method: post
+    memorySize: 128
+    timeout: 10
+    reservedConcurrency: 1
+  listen_action:
+    handler: handler.listen_action
+    events:
+      - httpApi:
+          path: /listen_action
           method: post
     memorySize: 128
     timeout: 10

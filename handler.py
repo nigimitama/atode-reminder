@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from modules import actions
 
 
-def bot(event, context):
+def listen_event(event, context):
     """SlackのEvents APIを使ってメッセージを監視し、「あとでよむ」が入っていれば1時間後にリマインドする"""
     try:
         body = event.get("body")
@@ -26,6 +26,18 @@ def bot(event, context):
                     print("A target message has been detected")
                     actions.react_by_emoji(event)
                     actions.set_reminder(event)
+
+        return {"statusCode": 200}
+    except Exception:
+        print(traceback.format_exc())
+        return {"statusCode": 500, "body": "unexpected error"}
+
+
+def listen_action(event, context):
+    """SlackのEvents APIを使ってメッセージを監視し、「あとでよむ」が入っていれば1時間後にリマインドする"""
+    try:
+        body = event.get("body")
+        actions.handle_interaction(body)
 
         return {"statusCode": 200}
     except Exception:
