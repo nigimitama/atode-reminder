@@ -34,7 +34,7 @@ def listen_event(event, context):
 
 
 def listen_action(event, context):
-    """SlackのEvents APIを使ってメッセージを監視し、「あとでよむ」が入っていれば1時間後にリマインドする"""
+    """リマインドに対するボタン操作に応じた処理を行う"""
     try:
         body = event.get("body")
         actions.handle_interaction(body)
