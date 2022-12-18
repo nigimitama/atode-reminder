@@ -1,22 +1,27 @@
 import json
 import re
+import os
 from base64 import b64decode
 from urllib.parse import unquote
 from datetime import datetime, timedelta
-from modules import slack
+from slack_sdk import WebClient
+from slack_sdk.web.slack_response import SlackResponse
 TIME_DELTA = timedelta(hours=1)
 
 
-def set_reminder(event: dict):
+def set_reminder(event: dict) -> SlackResponse:
+    client = WebClient(token=os.environ["SLACK_TOKEN"])
+
     # calc timestamp
     event_ts = float(event["event_ts"])
     event_time: datetime = datetime.fromtimestamp(event_ts) + TIME_DELTA
 
     # get message URL
-    message_url = slack.get_permalink(channel=event["channel"], message_ts=event["ts"])
+    response: SlackResponse = client.chat_getPermalink(channel=event["channel"], message_ts=event["ts"])
+    message_url: str = response.data.get("permalink")
 
     # set reminder
-    return slack.schedule_message(
+    return client.chat_scheduleMessage(
         channel=event["channel"],
         text="",
         post_at=int(event_time.timestamp()),
@@ -24,15 +29,17 @@ def set_reminder(event: dict):
     )
 
 
-def react_by_emoji(event: dict):
-    return slack.reactions_add(
+def react_by_emoji(event: dict) -> SlackResponse:
+    client = WebClient(token=os.environ["SLACK_TOKEN"])
+    return client.reactions_add(
         channel=event["channel"],
-        emoji_name="eyes",
+        name="eyes",
         timestamp=event["ts"]
     )
 
 
-def handle_interaction(body: str):
+def handle_interaction(body: str) -> SlackResponse:
+    client = WebClient(token=os.environ["SLACK_TOKEN"])
     body = _parse_interaction_payloads(body)
     print(f"body: {body}")
     print(f"actions: {body['actions']}")
@@ -47,7 +54,7 @@ def handle_interaction(body: str):
                 "text": f"> {buttons['done']}\nお疲れ様でした！",
             }
         }]
-        return slack.update_message(
+        return client.chat_update(
             channel=body["channel"]["id"],
             blocks=json.dumps(blocks),
             ts=body["message"]["ts"]
@@ -64,7 +71,7 @@ def handle_interaction(body: str):
         except KeyError:
             message_url = re.search(r"<(?P<url>http.+)>", body["message"]["blocks"]["text"]["text"]).group("url")
 
-        slack.schedule_message(
+        client.chat_scheduleMessage(
             channel=body["channel"]["id"],
             text="",
             post_at=int(action_time.timestamp()),
@@ -78,7 +85,7 @@ def handle_interaction(body: str):
                 "text": f"> {buttons['remind']}\nまたリマインドします！",
             }
         }]
-        return slack.update_message(
+        return client.chat_update(
             channel=body["channel"]["id"],
             blocks=json.dumps(blocks),
             ts=body["message"]["ts"]
