@@ -3,6 +3,7 @@ import re
 import traceback
 from datetime import datetime
 from modules import actions
+from modules.logger import SlackLogger
 
 
 def listen_event(event, context):
@@ -28,8 +29,9 @@ def listen_event(event, context):
                     actions.set_reminder(event)
 
         return {"statusCode": 200}
-    except Exception:
+    except Exception as e:
         print(traceback.format_exc())
+        SlackLogger.error("listen_event", e, traceback.format_exc())
         return {"statusCode": 500, "body": "unexpected error"}
 
 
@@ -40,6 +42,7 @@ def listen_action(event, context):
         actions.handle_interaction(body)
 
         return {"statusCode": 200}
-    except Exception:
+    except Exception as e:
         print(traceback.format_exc())
+        SlackLogger.error("listen_action", e, traceback.format_exc())
         return {"statusCode": 500, "body": "unexpected error"}
