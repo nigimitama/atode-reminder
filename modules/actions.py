@@ -6,6 +6,7 @@ from urllib.parse import unquote
 from datetime import datetime, timedelta
 from slack_sdk import WebClient
 from slack_sdk.web.slack_response import SlackResponse
+from modules.event_parser import EventParser
 TIME_DELTA = timedelta(hours=1)
 
 
@@ -30,11 +31,12 @@ def set_reminder(event: dict) -> SlackResponse:
 
 
 def react_by_emoji(event: dict) -> SlackResponse:
+    e = EventParser(event)
     client = WebClient(token=os.environ["SLACK_TOKEN"])
     return client.reactions_add(
-        channel=event["channel"],
+        channel=e.channel,
         name="eyes",
-        timestamp=event["ts"]
+        timestamp=e.message_ts
     )
 
 

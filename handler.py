@@ -3,6 +3,7 @@ import re
 import traceback
 from datetime import datetime
 from modules import actions
+from slack_sdk.errors import SlackApiError
 from modules.logger import SlackLogger
 from modules.event_parser import EventParser
 
@@ -32,8 +33,14 @@ def listen_event(event, context):
                 is_recent_message = (now - ts).seconds < 60
                 if is_recent_message:
                     print("A target message has been detected")
-                    actions.react_by_emoji(event)
-                    actions.set_reminder(event)
+                    try:
+                        actions.react_by_emoji(event)
+                        actions.set_reminder(event)
+                    except SlackApiError as e:
+                        # (1) メッセージが送信される、 (2) そのメッセージのリンクがプレビュー表示される、で同じメッセージのEventが2回来ることがあるのでalready_reactedだったら無視する
+                        print(f"Error catched: {e}")
+                        if e.resonse.get("error") != "already_reacted":
+                            raise e
 
         return {"statusCode": 200}
     except Exception as e:
