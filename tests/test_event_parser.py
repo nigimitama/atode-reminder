@@ -58,15 +58,15 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(ep.text, body["event"]["message"]["text"])
 
     def test_has_atode(self):
-        self.assertEqual(
-            EventParser._has_atode("<https://arxiv.org/abs/2211.16298>\nあとで読む"),
-            True
-        )
-        self.assertEqual(
-            EventParser._has_atode("あとで読む\n<https://arxiv.org/abs/2211.16298>"),
-            True
-        )
+        has_atode = EventParser._has_atode
+        self.assertTrue(has_atode("<https://arxiv.org/abs/2211.16298>\nあとで読む"))
+        self.assertTrue(has_atode("あとで読む\n<https://arxiv.org/abs/2211.16298>"))
+        self.assertTrue(has_atode("後で読む<https://arxiv.org/abs/2211.16298>"))
+        self.assertTrue(has_atode("atode\n\n <https://arxiv.org/abs/2211.16298>"))
+        self.assertTrue(has_atode("<https://arxiv.org/abs/2211.16298>\n あとで読む"))
 
+        self.assertFalse(has_atode("む"))
+        self.assertFalse(has_atode(""))
 
 if __name__ == '__main__':
     unittest.main()
