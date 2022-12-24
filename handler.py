@@ -25,14 +25,15 @@ def listen_event(event, context):
             ep = EventParser(event)
             channel = ep.channel
             message_ts = ep.message_ts
-
-            ts = datetime.fromtimestamp(float(ep.message_ts))
-            now = datetime.utcnow()
-            is_recent_message = (now - ts).seconds < 60
-            if is_recent_message:
-                print("A target message has been detected")
-                actions.react_by_emoji(event)
-                actions.set_reminder(event)
+            
+            if ep.has_atode:
+                ts = datetime.fromtimestamp(float(ep.message_ts))
+                now = datetime.utcnow()
+                is_recent_message = (now - ts).seconds < 60
+                if is_recent_message:
+                    print("A target message has been detected")
+                    actions.react_by_emoji(event)
+                    actions.set_reminder(event)
 
         return {"statusCode": 200}
     except Exception as e:
