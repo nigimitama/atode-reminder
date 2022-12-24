@@ -4,10 +4,13 @@ import traceback
 from datetime import datetime
 from modules import actions
 from modules.logger import SlackLogger
+from modules.event_parser import EventParser
 
 
 def listen_event(event, context):
     """SlackのEvents APIを使ってメッセージを監視し、「あとでよむ」が入っていれば1時間後にリマインドする"""
+    channel = None
+    message_ts = None
     try:
         body = event.get("body")
         print(f"body: {body}")
@@ -18,20 +21,23 @@ def listen_event(event, context):
             return {"statusCode": 200, "body": json.dumps({"challenge": body.get("challenge")})}
 
         event = body.get("event")
-        if event.get("type") == "message":
-            if re.match(r".*(あと|後)で(よ|読|み|見)", event["text"]) or re.match(r".*atode", event["text"]):
-                ts = datetime.fromtimestamp(float(event["ts"]))
-                now = datetime.utcnow()
-                is_recent_message = (now - ts).seconds < 60
-                if is_recent_message:
-                    print("A target message has been detected")
-                    actions.react_by_emoji(event)
-                    actions.set_reminder(event)
+        if event:
+            ep = EventParser(event)
+            channel = ep.channel
+            message_ts = ep.message_ts
+
+            ts = datetime.fromtimestamp(float(ep.message_ts))
+            now = datetime.utcnow()
+            is_recent_message = (now - ts).seconds < 60
+            if is_recent_message:
+                print("A target message has been detected")
+                actions.react_by_emoji(event)
+                actions.set_reminder(event)
 
         return {"statusCode": 200}
     except Exception as e:
         print(traceback.format_exc())
-        SlackLogger.error("listen_event", e, traceback.format_exc())
+        SlackLogger.error(func="listen_event", error=e, traceback=traceback.format_exc(), channel=channel, message_ts=message_ts)
         return {"statusCode": 500, "body": "unexpected error"}
 
 
@@ -44,5 +50,5 @@ def listen_action(event, context):
         return {"statusCode": 200}
     except Exception as e:
         print(traceback.format_exc())
-        SlackLogger.error("listen_action", e, traceback.format_exc())
+        SlackLogger.error(func="listen_action", error=e, traceback=traceback.format_exc())
         return {"statusCode": 500, "body": "unexpected error"}
