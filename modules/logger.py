@@ -3,9 +3,10 @@ from slack_sdk import WebClient
 
 
 class SlackLogger:
+    """開発者向けにログを通知する"""
     client = WebClient(token=os.environ["SLACK_TOKEN"])
-    LOG_OUTPUT_CHANNEL = 'C01F9H3DSCX'
-    DEVELOPER_ID = 'URN112HRD'
+    LOG_OUTPUT_CHANNEL = os.environ["LOG_OUTPUT_CHANNEL"]
+    DEVELOPER_ID = os.environ["DEVELOPER_ID"]
 
     @classmethod
     def error(cls, func, error, traceback, channel=None, message_ts=None) -> None:

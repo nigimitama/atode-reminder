@@ -8,6 +8,8 @@ provider:
   region: ap-northeast-1
   environment:
     SLACK_TOKEN: ${env:SLACK_TOKEN}
+    LOG_OUTPUT_CHANNEL: ${env:LOG_OUTPUT_CHANNEL}
+    DEVELOPER_ID: ${env:DEVELOPER_ID}
 
 functions:
   listen_event:
