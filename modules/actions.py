@@ -22,11 +22,12 @@ def set_reminder(event: dict) -> SlackResponse:
     message_url: str = response.data.get("permalink")
 
     # set reminder
+    e = EventParser(event)
     return client.chat_scheduleMessage(
-        channel=event["channel"],
+        channel=e.channel,
         text="",
         post_at=int(event_time.timestamp()),
-        blocks=_gen_blocks(message_url)
+        blocks=_gen_blocks(message_url, e.user)
     )
 
 
@@ -77,7 +78,7 @@ def handle_interaction(body: str) -> SlackResponse:
             channel=body["channel"]["id"],
             text="",
             post_at=int(action_time.timestamp()),
-            blocks=_gen_blocks(message_url)
+            blocks=_gen_blocks(message_url, body["user"]["id"])
         )
 
         blocks = [{
@@ -106,8 +107,9 @@ buttons = {
 }
 
 
-def _gen_blocks(message_url: str) -> str:
+def _gen_blocks(message_url: str, user_id: str) -> str:
     text=f"""
+<@{user_id}>
 読みましたか…？
 
 {message_url}
