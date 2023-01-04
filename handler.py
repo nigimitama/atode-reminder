@@ -39,7 +39,7 @@ def listen_event(event, context):
                     except SlackApiError as e:
                         # (1) メッセージが送信される、 (2) そのメッセージのリンクがプレビュー表示される、で同じメッセージのEventが2回来ることがあるのでalready_reactedだったら無視する
                         print(f"Error catched: {e}")
-                        if e.resonse.get("error") != "already_reacted":
+                        if e.response.get("error") != "already_reacted":
                             raise e
 
         return {"statusCode": 200}
